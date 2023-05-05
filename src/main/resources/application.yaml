@@ -1,0 +1,10 @@
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      batch-size: 100
+      concurrency: 2
+      enable-auto-commit: false
+      auto-offset-reset: earliest
+    producer:
+      max-block-ms: 200
