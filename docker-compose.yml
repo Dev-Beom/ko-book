@@ -1,0 +1,42 @@
+version: '3.7'
+services:
+  zookeeper:
+    image: bitnami/zookeeper:3-debian-10
+    ports:
+      - 2181:2181
+    volumes:
+      - ./tmp/zookeeper_data:/bitnami
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    healthcheck:
+      test: echo srvr | nc localhost 2181 | grep Zookeeper
+      interval: 2s
+      timeout: 1s
+      retries: 5
+  kafka:
+    image: bitnami/kafka:2-debian-10
+    ports:
+      - 9092:9092
+    volumes:
+      - ./tmp/kafka_data:/bitnami
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9092
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: true
+      ALLOW_PLAINTEXT_LISTENER: yes
+      KAFKA_CREATE_TOPICS: "main-group:2:1"
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+  redis:
+    container_name: redis
+    hostname: redis6379
+    image: redis:5.0.8
+    command: redis-server
+    labels:
+      - "name=redis"
+      - "mode=standalone"
+    ports:
+      - 6379:6379
