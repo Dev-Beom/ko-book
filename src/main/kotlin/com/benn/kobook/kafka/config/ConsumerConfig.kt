@@ -1,5 +1,6 @@
 package com.benn.kobook.kafka.config
 
+import com.benn.kobook.common.KoBookConfiguration
 import com.benn.kobook.kafka.model.Event
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -17,23 +18,34 @@ import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.util.backoff.FixedBackOff
 
 @Configuration
-class ConsumerConfig {
-    private val logger = LoggerFactory.getLogger(ConsumerConfig::class.java)
-
+class ConsumerConfig(
     @Value("\${spring.kafka.bootstrap-servers}")
-    lateinit var BOOTSTRAP_SERVER: String
+    private val BOOTSTRAP_SERVER: String,
 
     @Value("\${spring.kafka.consumer.enable-auto-commit}")
-    lateinit var ENABLE_AUTO_COMMIT: String
+    private val ENABLE_AUTO_COMMIT: String,
 
     @Value("\${spring.kafka.consumer.auto-offset-reset}")
-    lateinit var AUTO_OFFSET_RESET: String
+    private val AUTO_OFFSET_RESET: String,
 
     @Value("\${spring.kafka.consumer.batch-size}")
-    lateinit var BATCH_SIZE: String
+    private val BATCH_SIZE: String,
 
     @Value("\${spring.kafka.consumer.concurrency}")
-    lateinit var CONCURRENCY: String
+    private val CONCURRENCY: String
+) : KoBookConfiguration() {
+    private val logger = LoggerFactory.getLogger(ConsumerConfig::class.java)
+
+    init {
+        super.initMessage(
+            ConsumerConfig::class.java,
+            "BOOTSTRAP_SERVER" to BOOTSTRAP_SERVER,
+            "ENABLE_AUTO_COMMIT" to ENABLE_AUTO_COMMIT,
+            "AUTO_OFFSET_RESET" to AUTO_OFFSET_RESET,
+            "BATCH_SIZE" to BATCH_SIZE,
+            "CONCURRENCY" to CONCURRENCY
+        )
+    }
 
     @Bean
     fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, Event> {
